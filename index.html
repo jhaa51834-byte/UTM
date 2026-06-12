@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTM Automation Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-card: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08);
+            --text-primary: #f0f2f5;
+            --text-secondary: #8b92a5;
+            --accent-purple: #8b5cf6;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated gradient background */
+        .bg-gradient {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background: 
+                radial-gradient(ellipse 60% 50% at 20% 20%, rgba(139,92,246,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 80%, rgba(59,130,246,0.10) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 50% 50%, rgba(6,182,212,0.06) 0%, transparent 70%);
+            animation: bgShift 12s ease-in-out infinite alternate;
+        }
+        @keyframes bgShift {
+            0%   { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(2deg); }
+        }
+
+        .container {
+            position: relative; z-index: 1;
+            max-width: 1100px; margin: 0 auto; padding: 40px 24px;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center; padding: 60px 0 40px;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25);
+            padding: 6px 16px; border-radius: 100px;
+            font-size: 13px; font-weight: 500; color: var(--accent-purple);
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s ease;
+        }
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800;
+            line-height: 1.15; margin-bottom: 20px;
+            background: linear-gradient(135deg, #f0f2f5 0%, #8b5cf6 50%, #3b82f6 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.6s ease 0.1s both;
+        }
+        .hero p {
+            font-size: 1.1rem; color: var(--text-secondary);
+            max-width: 650px; margin: 0 auto 32px; line-height: 1.7;
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+        .hero-buttons {
+            display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 28px; border-radius: 12px;
+            font-size: 15px; font-weight: 600; text-decoration: none;
+            transition: all 0.25s ease; cursor: pointer; border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            color: #fff; box-shadow: 0 4px 20px rgba(139,92,246,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(139,92,246,0.45); }
+        .btn-outline {
+            background: rgba(255,255,255,0.05); color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); }
+
+        /* Tech Stack */
+        .stack-bar {
+            display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+            padding: 28px 0; margin: 10px 0 50px;
+            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease 0.4s both;
+        }
+        .stack-item {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 14px; color: var(--text-secondary); font-weight: 500;
+        }
+        .stack-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Features grid */
+        .section-title {
+            text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 12px;
+        }
+        .section-subtitle {
+            text-align: center; font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 40px;
+        }
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 18px; margin-bottom: 60px;
+        }
+        .feature-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 28px;
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(139,92,246,0.25);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+        }
+        .feature-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin-bottom: 16px;
+        }
+        .feature-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+        .feature-card p { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65; }
+
+        /* API table */
+        .api-section { margin-bottom: 60px; }
+        .api-table-wrap {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left; padding: 14px 20px;
+            font-size: 12px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--text-secondary);
+            background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 12px 20px; font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        .method-badge {
+            display: inline-block; padding: 2px 10px; border-radius: 6px;
+            font-size: 12px; font-weight: 700; font-family: monospace;
+        }
+        .method-get  { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+        .method-post { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+        .method-del  { background: rgba(236,72,153,0.15); color: var(--accent-pink); }
+        .path-code { font-family: monospace; color: var(--accent-cyan); font-size: 13px; }
+
+        /* Footer */
+        footer {
+            text-align: center; padding: 40px 0 30px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary); font-size: 14px;
+        }
+        footer a { color: var(--accent-purple); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 20px 16px; }
+            .hero { padding: 30px 0 20px; }
+            .stack-bar { gap: 18px; }
+            .features-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="container">
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-badge">🔗 Enterprise UTM Builder</div>
+            <h1>UTM Automation Tool</h1>
+            <p>
+                Guided single-URL generation, bulk CSV processing, naming governance,
+                templates, history, QR codes &amp; short links — built API-first for
+                GA4, Adobe Analytics, Tealium &amp; GTM workflows.
+            </p>
+            <div class="hero-buttons">
+                <a href="https://github.com/jhaa51834-byte/UTM" target="_blank" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    View on GitHub
+                </a>
+                <a href="#features" class="btn btn-outline">Explore Features ↓</a>
+            </div>
+        </section>
+
+        <!-- Tech Stack -->
+        <div class="stack-bar">
+            <div class="stack-item"><div class="stack-dot" style="background:#3b82f6"></div> React 18 + TypeScript</div>
+            <div class="stack-item"><div class="stack-dot" style="background:#10b981"></div> FastAPI + Python</div>
+            <div class="stack-item"><div class="stack-dot" style="background:#8b5cf6"></div> SQLAlchemy 2</div>
+            <div class="stack-item"><div class="stack-dot" style="background:#06b6d4"></div> Vite</div>
+            <div class="stack-item"><div class="stack-dot" style="background:#ec4899"></div> PostgreSQL / SQLite</div>
+        </div>
+
+        <!-- Features -->
+        <section id="features">
+            <h2 class="section-title">Features</h2>
+            <p class="section-subtitle">Everything your marketing team needs for UTM management</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:rgba(139,92,246,0.12)">🏗️</div>
+                    <h3>UTM Builder</h3>
+                    <p>Destination URL input with query string & fragment preservation, dropdowns for source/medium, unlimited custom parameters, and live validation.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:rgba(59,130,246,0.12)">🤖</div>
+                    <h3>AI Naming Assistant</h3>
+                    <p>Free text → suggested UTMs with mandatory user approval. Works offline via rules engine; uses Claude when an API key is set.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:rgba(16,185,129,0.12)">📋</div>
+                    <h3>Bulk CSV Processing</h3>
+                    <p>Upload CSV with URL, Source, Medium, Campaign columns. Per-row validation with export to CSV or Excel.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:rgba(6,182,212,0.12)">🛡️</div>
+                    <h3>Governance Rules</h3>
+                    <p>Admin-defined combination rules (e.g., google → cpc/organic only). Error rules block generation with explicit override.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:rgba(236,72,153,0.12)">📦</div>
+                    <h3>Templates & History</h3>
+                    <p>Save/reuse team presets. Full history with user, date, campaign tracking. Search & filter capabilities.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:rgba(245,158,11,0.12)">🔗</div>
+                    <h3>Short Links & QR Codes</h3>
+                    <p>TinyURL (no key) and Bitly (token) integration. PNG & SVG QR code download with copy-to-clipboard.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- API -->
+        <section class="api-section">
+            <h2 class="section-title">API Endpoints</h2>
+            <p class="section-subtitle">RESTful API under /api — interactive docs at /docs</p>
+            <div class="api-table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Method</th><th>Path</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="method-badge method-post">POST</span></td><td class="path-code">/api/generate-utm</td><td>Validate + govern + build URL</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span></td><td class="path-code">/api/validate</td><td>Validation preview</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span></td><td class="path-code">/api/campaign-name</td><td>Slugify campaign name</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span></td><td class="path-code">/api/ai-suggest</td><td>AI UTM suggestions</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span></td><td class="path-code">/api/bulk-generate</td><td>CSV bulk generation</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span></td><td class="path-code">/api/templates</td><td>List templates</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span></td><td class="path-code">/api/history</td><td>Search generated URLs</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span></td><td class="path-code">/api/governance-rules</td><td>List governance rules</td></tr>
+                        <tr><td><span class="method-badge method-post">POST</span></td><td class="path-code">/api/shorten</td><td>Short link generation</td></tr>
+                        <tr><td><span class="method-badge method-get">GET</span></td><td class="path-code">/api/qr</td><td>QR code (PNG/SVG)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Built with ❤️ | <a href="https://github.com/jhaa51834-byte/UTM" target="_blank">GitHub Repository</a></p>
+        </footer>
+
+    </div>
+</body>
+</html>
