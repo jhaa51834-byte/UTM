@@ -3,8 +3,9 @@ title: UTM Automation Tool
 emoji: 🔗
 colorFrom: purple
 colorTo: blue
-sdk: static
+sdk: docker
 pinned: false
+app_port: 7860
 ---
 
 # UTM Builder
