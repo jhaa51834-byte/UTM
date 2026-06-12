@@ -1,3 +1,12 @@
+---
+title: UTM Automation Tool
+emoji: 🔗
+colorFrom: purple
+colorTo: blue
+sdk: static
+pinned: false
+---
+
 # UTM Builder
 
 Enterprise UTM link builder for digital marketing teams: guided single-URL
