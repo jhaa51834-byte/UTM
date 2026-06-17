@@ -8,17 +8,31 @@ RUN npm run build
 
 # ── Stage 2: Production image ──
 FROM python:3.11-slim
-WORKDIR /app
+
+# Create a non-root user with UID 1000
+RUN useradd -m -u 1000 user
+
+# Set up environment variables
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH
+
+WORKDIR /home/user/app
 
 # Install backend dependencies
 COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend code
-COPY backend/app ./app
+# Copy backend code with correct ownership
+COPY --chown=user:user backend/app ./app
 
-# Copy built frontend into static directory
-COPY --from=frontend-build /app/frontend/dist ./static
+# Copy built frontend into static directory with correct ownership
+COPY --chown=user:user --from=frontend-build /app/frontend/dist ./static
+
+# Ensure correct permissions on the app directory
+RUN chown -R user:user /home/user/app
+
+# Switch to the non-root user
+USER user
 
 # HF Spaces requires port 7860
 ENV PORT=7860
