@@ -1,15 +1,52 @@
+# ── Core Framework ──────────────────────────────────────────────
 fastapi>=0.115
 uvicorn[standard]>=0.32
-sqlalchemy>=2.0
 pydantic>=2.9
 pydantic-settings>=2.6
+
+# ── Database ────────────────────────────────────────────────────
+sqlalchemy>=2.0
+asyncpg>=0.30             # PostgreSQL async driver
+psycopg2-binary>=2.9      # PostgreSQL sync (migrations, Celery)
+alembic>=1.14             # Database migrations
+
+# ── Redis ───────────────────────────────────────────────────────
+redis>=5.2
+
+# ── ClickHouse ──────────────────────────────────────────────────
+clickhouse-connect>=0.8
+
+# ── Auth ────────────────────────────────────────────────────────
+python-jose[cryptography]>=3.3
+passlib[bcrypt]>=1.7
+bcrypt==4.3.0
+pydantic[email]           # EmailStr support
+
+# ── HTTP Client ─────────────────────────────────────────────────
 httpx>=0.27
+
+# ── QR Codes ────────────────────────────────────────────────────
 segno>=1.6
+
+# ── Excel / CSV ─────────────────────────────────────────────────
 openpyxl>=3.1
+
+# ── File Upload ─────────────────────────────────────────────────
 python-multipart>=0.0.12
 
-# Production database driver (uncomment for PostgreSQL):
-# psycopg2-binary>=2.9
+# ── Background Tasks ───────────────────────────────────────────
+celery[redis]>=5.4
 
-# Dev / test
+# ── GeoIP (optional) ───────────────────────────────────────────
+geoip2>=4.8
+
+# ── User Agent Parsing ─────────────────────────────────────────
+# (built-in lightweight parser; install for advanced parsing)
+# user-agents>=2.2
+
+# ── Dev / Test ──────────────────────────────────────────────────
 pytest>=8.0
+pytest-asyncio>=0.24
+httpx  # TestClient
+ruff>=0.8
+locust>=2.31             # Load testing

@@ -23,10 +23,24 @@ DEFAULT_RULES = [
 ]
 
 
-def seed_default_rules(db: Session) -> None:
-    if db.query(GovernanceRule).count() == 0:
+def seed_default_rules(db: Session, org_id=None) -> None:
+    if not org_id:
+        import uuid
+        org_id = uuid.UUID(int=0)
+
+    # Ensure default organization exists
+    from ..models.organization import Organization
+    org = db.query(Organization).filter(Organization.id == org_id).first()
+    if not org:
+        org = Organization(id=org_id, name="Default Organization", slug="default")
+        db.add(org)
+        db.commit()
+
+    if db.query(GovernanceRule).filter(GovernanceRule.org_id == org_id).count() == 0:
         for rule in DEFAULT_RULES:
-            db.add(GovernanceRule(**rule))
+            r = rule.copy()
+            r["org_id"] = org_id
+            db.add(GovernanceRule(**r))
         db.commit()
 
 
@@ -39,7 +53,7 @@ def check_governance(db: Session, params: UtmParams) -> list[ValidationIssue]:
         "utm_content": (params.utm_content or "").strip().lower(),
         "utm_term": (params.utm_term or "").strip().lower(),
     }
-    rules = db.query(GovernanceRule).filter(GovernanceRule.active.is_(True)).all()
+    rules = db.query(GovernanceRule).filter(GovernanceRule.is_active.is_(True)).all()
     for rule in rules:
         if values.get(rule.match_field, "") != rule.match_value.lower():
             continue
@@ -55,3 +69,4 @@ def check_governance(db: Session, params: UtmParams) -> list[ValidationIssue]:
                 field=rule.required_field,
             ))
     return issues
+
