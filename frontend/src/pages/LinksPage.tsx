@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { Plus, Search, Copy, Check, Target, Trash2, Link2, MousePointerClick } from "lucide-react";
 
@@ -59,10 +60,10 @@ export default function LinksPage() {
           <h1 className="page-title">Links</h1>
           <p className="page-subtitle">{total} total links</p>
         </div>
-        <a href="/builder" className="btn-primary">
+        <Link to="/builder" className="btn-primary">
           <Plus className="h-4 w-4" />
           New Link
-        </a>
+        </Link>
       </div>
 
       {/* Search */}
@@ -174,13 +175,13 @@ export default function LinksPage() {
                       >
                         <Copy className="h-3.5 w-3.5" />
                       </button>
-                      <a
-                        href={`/links/${link.id}/targeting`}
-                        className="rounded-lg p-2 text-violet-500 hover:bg-violet-500/10 hover:text-violet-300 transition-colors"
+                      <Link
+                        to={`/links/${link.id}/targeting`}
+                        className="rounded-lg p-2 text-violet-400 hover:bg-violet-500/10 hover:text-violet-300 transition-colors"
                         title="Targeting Rules"
                       >
                         <Target className="h-3.5 w-3.5" />
-                      </a>
+                      </Link>
                       <button
                         onClick={() => deleteLink(link.id)}
                         className="rounded-lg p-2 text-zinc-600 hover:bg-red-500/10 hover:text-red-400 transition-colors"

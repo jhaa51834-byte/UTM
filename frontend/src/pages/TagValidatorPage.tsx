@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { api } from "../lib/api";
 
-const inputCls =
-  "w-full rounded-lg border border-white/[0.1] bg-white/[0.04] px-3 py-2 text-sm " +
-  "text-white placeholder:text-zinc-600 focus:border-fuchsia-400/60 focus:outline-none " +
-  "focus:ring-4 focus:ring-fuchsia-500/15";
-
 const CATEGORY_LABELS: Record<string, string> = {
   analytics: "Analytics",
   tag_manager: "Tag Manager",
@@ -14,9 +9,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const LEVEL_STYLES: Record<string, string> = {
-  error: "border-rose-400/40 bg-rose-500/10 text-rose-300",
-  warning: "border-amber-400/40 bg-amber-500/10 text-amber-300",
-  info: "border-sky-400/40 bg-sky-500/10 text-sky-300",
+  error: "bg-red-500/8 border border-red-500/15 text-red-300",
+  warning: "bg-amber-500/8 border border-amber-500/15 text-amber-300",
+  info: "bg-blue-500/8 border border-blue-500/15 text-blue-300",
 };
 
 function scoreColor(score: number): string {
@@ -47,40 +42,39 @@ export default function TagValidatorPage() {
   return (
     <div className="animate-fade-up mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Tag Validator</h1>
-        <p className="mt-0.5 text-sm text-zinc-500">
+        <h1 className="page-title">Tag Validator</h1>
+        <p className="page-subtitle">
           Check a destination for GA4, Universal Analytics, Google Tag Manager, Adobe, Tealium and Meta Pixel.
         </p>
       </div>
 
       {/* Input card */}
-      <section className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 backdrop-blur-xl">
+      <section className="glass rounded-2xl p-5">
         <div className="mb-3 flex gap-2">
           {(["url", "html"] as const).map((m) => (
             <button key={m} onClick={() => setMode(m)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
-                mode === m ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
-                : "border border-white/10 text-zinc-400 hover:text-white"}`}>
+              className={`btn-secondary text-xs ${
+                mode === m ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white border-violet-500/10 hover:translate-y-0" : ""
+              }`}>
               {m === "url" ? "Fetch URL" : "Paste HTML"}
             </button>
           ))}
         </div>
 
         {mode === "url" ? (
-          <input className={inputCls} value={url} placeholder="https://company.com/landing?utm_source=google"
+          <input className="input-field" value={url} placeholder="https://company.com/landing?utm_source=google"
             onChange={(e) => setUrl(e.target.value)} />
         ) : (
           <>
-            <input className={`${inputCls} mb-2`} value={url}
+            <input className="input-field mb-2" value={url}
               placeholder="Optional destination URL (for UTM check)"
               onChange={(e) => setUrl(e.target.value)} />
-            <textarea className={`${inputCls} h-40 font-mono text-xs`} value={html}
+            <textarea className="input-field h-40 font-mono text-xs" value={html}
               placeholder="Paste page HTML here…" onChange={(e) => setHtml(e.target.value)} />
           </>
         )}
 
-        <button onClick={run} disabled={loading}
-          className="mt-3 rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">
+        <button onClick={run} disabled={loading} className="mt-3 btn-primary">
           {loading ? "Validating…" : "Validate tags"}
         </button>
         {error && <p className="mt-2 text-sm text-rose-400">{error}</p>}
@@ -90,8 +84,8 @@ export default function TagValidatorPage() {
       {report && (
         <section className="space-y-5">
           {/* Score */}
-          <div className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
-            <div className={`text-4xl font-black ${scoreColor(report.score)}`}>{report.score}</div>
+          <div className="flex items-center gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+            <div className={`text-4xl font-black ${scoreColor(report.score)}`} style={{ fontFamily: 'var(--font-display)' }}>{report.score}</div>
             <div>
               <p className="text-sm font-semibold text-white">Tag coverage score</p>
               <p className="text-xs text-zinc-500">
@@ -105,12 +99,11 @@ export default function TagValidatorPage() {
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {report.tags.map((t: any) => (
               <div key={t.key}
-                className={`rounded-xl border p-3 ${t.found
-                  ? "border-emerald-500/20 bg-emerald-500/[0.06]" : "border-white/[0.06] bg-white/[0.02]"}`}>
+                className={`rounded-xl border p-3 transition-all duration-200 hover:border-white/[0.1] ${t.found
+                  ? "border-emerald-500/20 bg-emerald-500/[0.04]" : "border-white/[0.06] bg-white/[0.015]"}`}>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-zinc-200">{t.label}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                    t.found ? "bg-emerald-500/20 text-emerald-300" : "bg-zinc-500/20 text-zinc-500"}`}>
+                  <span className={`badge ${t.found ? "badge-success" : "badge-danger opacity-60"}`}>
                     {t.found ? "found" : "missing"}
                   </span>
                 </div>
@@ -145,7 +138,7 @@ export default function TagValidatorPage() {
             <div className="space-y-2">
               <p className="text-sm font-semibold text-white">Recommendations</p>
               {report.recommendations.map((r: any, i: number) => (
-                <div key={i} className={`rounded-lg border px-3 py-2 text-sm ${LEVEL_STYLES[r.level] || LEVEL_STYLES.info}`}>
+                <div key={i} className={`rounded-xl border px-3 py-2 text-sm ${LEVEL_STYLES[r.level] || LEVEL_STYLES.info}`}>
                   {r.message}
                 </div>
               ))}

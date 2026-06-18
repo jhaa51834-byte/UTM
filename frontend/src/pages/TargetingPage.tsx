@@ -198,7 +198,7 @@ function GlassInput({ className = "", ...props }: React.InputHTMLAttributes<HTML
   return (
     <input
       {...props}
-      className={`w-full rounded-xl border border-white/[0.1] bg-white/[0.05] px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-600 transition-all duration-200 focus:border-violet-500/50 focus:bg-white/[0.08] focus:outline-none focus:ring-4 focus:ring-violet-500/10 ${className}`}
+      className={`input-field ${className}`}
     />
   );
 }
@@ -207,7 +207,7 @@ function GlassSelect({ className = "", children, ...props }: React.SelectHTMLAtt
   return (
     <select
       {...props}
-      className={`w-full appearance-none rounded-xl border border-white/[0.1] bg-white/[0.05] px-3.5 py-2.5 text-sm text-white transition-all duration-200 focus:border-violet-500/50 focus:bg-white/[0.08] focus:outline-none focus:ring-4 focus:ring-violet-500/10 ${className}`}
+      className={`input-field ${className}`}
     >
       {children}
     </select>
@@ -216,16 +216,16 @@ function GlassSelect({ className = "", children, ...props }: React.SelectHTMLAtt
 
 function GradientButton({ children, variant = "primary", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "danger" | "ghost" }) {
   const styles = {
-    primary: "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:from-violet-500 hover:to-fuchsia-500 disabled:opacity-40 disabled:shadow-none",
-    secondary: "border border-white/[0.12] bg-white/[0.05] text-zinc-300 hover:bg-white/[0.1] hover:text-white hover:border-white/[0.2]",
-    danger: "border border-rose-500/20 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 hover:border-rose-500/30",
-    ghost: "text-zinc-400 hover:text-white hover:bg-white/[0.06]",
+    primary: "btn-primary",
+    secondary: "btn-secondary",
+    danger: "btn-danger text-sm font-semibold",
+    ghost: "btn-secondary bg-transparent hover:bg-white/[0.06] border-transparent hover:border-transparent text-zinc-400 hover:text-white hover:translate-y-0",
   };
   return (
     <button
       type="button"
       {...props}
-      className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.97] ${styles[variant]} ${props.className || ""}`}
+      className={`${styles[variant]} ${props.className || ""}`}
     >
       {children}
     </button>
@@ -234,14 +234,14 @@ function GradientButton({ children, variant = "primary", ...props }: React.Butto
 
 function SmallButton({ children, variant = "ghost", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "ghost" | "danger" }) {
   const styles = {
-    ghost: "text-zinc-500 hover:text-white hover:bg-white/[0.08]",
-    danger: "text-rose-400/70 hover:text-rose-300 hover:bg-rose-500/10",
+    ghost: "btn-secondary text-xs px-2.5 py-1.5 bg-transparent border-transparent hover:bg-white/[0.06] hover:border-transparent hover:translate-y-0",
+    danger: "btn-danger text-xs px-2.5 py-1.5",
   };
   return (
     <button
       type="button"
       {...props}
-      className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-all duration-200 ${styles[variant]}`}
+      className={`${styles[variant]} ${props.className || ""}`}
     >
       {children}
     </button>
@@ -419,7 +419,7 @@ export default function TargetingPage() {
                 {Icons.target}
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
+                <h1 className="page-title">
                   Targeting & A/B Testing
                 </h1>
                 {link && (
@@ -676,8 +676,8 @@ export default function TargetingPage() {
                 <label className="flex items-center gap-2.5 cursor-pointer group">
                   <div className="relative">
                     <input type="checkbox" checked={abSticky} onChange={(e) => setABSticky(e.target.checked)} className="sr-only peer" />
-                    <div className="h-5 w-9 rounded-full bg-white/[0.1] transition-colors peer-checked:bg-violet-500/60" />
-                    <div className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-zinc-400 transition-all peer-checked:left-[18px] peer-checked:bg-white" />
+                    <div className="h-5 w-9 rounded-full bg-white/[0.06] border border-white/[0.08] transition-colors peer-checked:bg-violet-500/30 peer-checked:border-violet-500/40" />
+                    <div className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-zinc-500 transition-all peer-checked:left-[18px] peer-checked:bg-violet-400" />
                   </div>
                   <span className="text-xs text-zinc-400 group-hover:text-zinc-300 transition-colors">
                     Sticky sessions

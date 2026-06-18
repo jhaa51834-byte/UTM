@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { Plus, Link2, MousePointerClick, Calendar, X } from "lucide-react";
 
 export default function CampaignsPage() {
+  const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: "", description: "", start_date: "", end_date: "" });
@@ -130,6 +132,7 @@ export default function CampaignsPage() {
             return (
               <div
                 key={c.id}
+                onClick={() => navigate(`/links?search=${c.slug}`)}
                 className="glass glass-hover gradient-border cursor-pointer rounded-2xl p-5 transition-all duration-300 animate-fade-up"
                 style={{ animationDelay: `${i * 0.07}s` }}
               >
