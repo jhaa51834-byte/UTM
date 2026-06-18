@@ -249,6 +249,30 @@ export const api = {
     return res.blob();
   },
 
+  // Smart redirect rules
+  getRules: (linkId: string) => request<any[]>(`/links/${linkId}/rules`),
+  createRule: (linkId: string, data: any) =>
+    request<any>(`/links/${linkId}/rules`, { method: "POST", body: JSON.stringify(data) }),
+  updateRule: (ruleId: string, data: any) =>
+    request<any>(`/rules/${ruleId}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteRule: (ruleId: string) =>
+    request<{ deleted: number }>(`/rules/${ruleId}`, { method: "DELETE" }),
+
+  // A/B testing
+  getABTest: (linkId: string) => request<any>(`/links/${linkId}/ab-test`),
+  createABTest: (linkId: string, data: any) =>
+    request<any>(`/links/${linkId}/ab-test`, { method: "POST", body: JSON.stringify(data) }),
+  updateABTest: (testId: string, data: any) =>
+    request<any>(`/ab-tests/${testId}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteABTest: (testId: string) =>
+    request<{ deleted: number }>(`/ab-tests/${testId}`, { method: "DELETE" }),
+  getABResults: (testId: string) => request<any>(`/ab-tests/${testId}/results`),
+  declareWinner: (testId: string, variantId: string, applyToLink = true) =>
+    request<any>(`/ab-tests/${testId}/declare-winner`, {
+      method: "POST",
+      body: JSON.stringify({ variant_id: variantId, apply_to_link: applyToLink }),
+    }),
+
   // Admin
   getAuditLogs: (params: Record<string, string> = {}) => {
     const qs = new URLSearchParams(params).toString();

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
-from ..deps import CurrentUser, RequireManager, RequireViewer, get_db
+from ..deps import CurrentUser, get_db, require_role
 from ..models.qr_code import QRCode
 from ..schemas.qr import QRCreate, QROut
 from ..services.qr_generator import generate_qr, generate_qr_with_style
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/qr", tags=["qr-codes"])
 def create_qr(
     req: QRCreate,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireManager),
+    user: CurrentUser = Depends(require_role("marketing_manager")),
 ):
     """Create and store a QR code."""
     org_id = user.require_org()
@@ -53,7 +53,7 @@ def create_qr(
 def download_qr(
     qr_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireViewer),
+    user: CurrentUser = Depends(require_role("viewer")),
 ):
     """Download a QR code image."""
     org_id = user.require_org()

@@ -7,6 +7,7 @@ import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import BuilderPage from "./pages/BuilderPage";
 import LinksPage from "./pages/LinksPage";
+import TargetingPage from "./pages/TargetingPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import CampaignsPage from "./pages/CampaignsPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -43,6 +44,7 @@ export default function App() {
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="builder" element={<BuilderPage />} />
               <Route path="links" element={<LinksPage />} />
+              <Route path="links/:id/targeting" element={<TargetingPage />} />
               <Route path="analytics" element={<AnalyticsPage />} />
               <Route path="campaigns" element={<CampaignsPage />} />
               <Route path="settings" element={<SettingsPage />} />

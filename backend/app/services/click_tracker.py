@@ -27,6 +27,9 @@ def build_click_event(
     utm_content: str = "",
     utm_term: str = "",
     is_qr_scan: bool = False,
+    language: str = "",
+    variant_id: str = "",
+    rule_id: str = "",
 ) -> dict:
     """Build a click event dict ready for ClickHouse insertion."""
     now = datetime.now(timezone.utc)
@@ -66,9 +69,12 @@ def build_click_event(
         "utm_campaign": utm_campaign,
         "utm_content": utm_content,
         "utm_term": utm_term,
+        "language": language,
         "is_unique": 1,  # TODO: check Redis for uniqueness within time window
         "is_bot": 1 if ua.is_bot else 0,
         "is_qr_scan": 1 if is_qr_scan else 0,
+        "variant_id": variant_id,
+        "rule_id": rule_id,
     }
 
 

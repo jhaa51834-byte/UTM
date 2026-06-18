@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from ..deps import CurrentUser, RequireAdmin, get_current_user, get_db
+from ..deps import CurrentUser, get_current_user, get_db, require_role
 from ..models.organization import OrgMembership, Organization, Team
 from ..models.user import User
 from ..schemas.common import DeleteResponse
@@ -71,7 +71,7 @@ def get_org(
 def list_members(
     org_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     memberships = db.query(OrgMembership).filter(OrgMembership.org_id == org_id).all()
     result = []
@@ -90,7 +90,7 @@ def invite_member(
     org_id: UUID,
     req: MemberInvite,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     target_user = db.query(User).filter(User.email == req.email.lower()).first()
     if not target_user:
@@ -116,7 +116,7 @@ def update_member_role(
     member_id: UUID,
     req: MemberRoleUpdate,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     m = db.query(OrgMembership).filter(
         OrgMembership.id == member_id, OrgMembership.org_id == org_id,
@@ -137,7 +137,7 @@ def remove_member(
     org_id: UUID,
     member_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     m = db.query(OrgMembership).filter(
         OrgMembership.id == member_id, OrgMembership.org_id == org_id,
@@ -156,7 +156,7 @@ def create_team(
     org_id: UUID,
     req: TeamCreate,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     team = Team(org_id=org_id, name=req.name, description=req.description)
     db.add(team)

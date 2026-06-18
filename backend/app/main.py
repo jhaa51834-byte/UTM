@@ -123,7 +123,8 @@ API = settings.api_prefix
 
 from .routers import (  # noqa: E402
     admin, analytics, auth, bulk, campaigns, domains, governance,
-    history, links, organizations, qr, redirect, templates, tools, utm,
+    history, links, organizations, qr, redirect, targeting, templates,
+    tools, utm,
 )
 
 # Auth (no prefix — under /api/v1/auth)
@@ -137,6 +138,9 @@ app.include_router(domains.router, prefix=API)
 app.include_router(qr.router, prefix=API)
 app.include_router(analytics.router, prefix=API)
 app.include_router(organizations.router, prefix=API)
+
+# Smart redirect rules + A/B testing
+app.include_router(targeting.router, prefix=API)
 
 # Existing ported routes
 app.include_router(templates.router, prefix=API)
