@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { api } from "../lib/api";
+import DeepLinkCard from "../components/DeepLinkCard";
 
 /* ── Constants ───────────────────────────────────────────── */
 const FIELDS = [
@@ -45,15 +46,6 @@ function condToPayload(c: Cond) {
     };
   }
   return { field: c.field, operator: c.operator, value: c.value.trim() };
-}
-
-function summarize(conditions: any[]): string {
-  return (conditions || [])
-    .map((c) => {
-      const v = Array.isArray(c.value) ? c.value.join(" / ") : c.value;
-      return `${c.field} ${c.operator} ${v}`;
-    })
-    .join("  AND  ");
 }
 
 const emptyVariant = (weight: number, control = false) => ({
@@ -881,6 +873,9 @@ export default function TargetingPage() {
           </div>
         )}
       </SectionCard>
+
+      {/* ── Smart Deep Linking ───────────────────────────── */}
+      <DeepLinkCard linkId={id} />
     </div>
   );
 }

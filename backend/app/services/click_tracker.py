@@ -30,6 +30,7 @@ def build_click_event(
     language: str = "",
     variant_id: str = "",
     rule_id: str = "",
+    deeplink_outcome: str = "",
 ) -> dict:
     """Build a click event dict ready for ClickHouse insertion."""
     now = datetime.now(timezone.utc)
@@ -75,6 +76,7 @@ def build_click_event(
         "is_qr_scan": 1 if is_qr_scan else 0,
         "variant_id": variant_id,
         "rule_id": rule_id,
+        "deeplink_outcome": deeplink_outcome,
     }
 
 

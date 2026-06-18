@@ -1,20 +1,25 @@
 """Targeting router: smart-redirect routing rules and A/B tests for a link."""
 from __future__ import annotations
 
+import json
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from fastapi import Request
+
 from ..deps import CurrentUser, get_db, require_role
 from ..models.link import Link
-from ..models.targeting import ABTest, ABVariant, RoutingRule
+from ..models.targeting import ABTest, ABVariant, DeepLinkConfig, RoutingRule
 from ..schemas.common import DeleteResponse
 from ..schemas.targeting import (
     ABTestCreate, ABTestOut, ABTestResults, ABTestUpdate, ABVariantResult,
-    DeclareWinnerRequest, RoutingRuleCreate, RoutingRuleOut, RoutingRuleUpdate,
+    DeclareWinnerRequest, DeepLinkConfigOut, DeepLinkConfigUpsert,
+    DeferredDeepLinkOut, RoutingRuleCreate, RoutingRuleOut, RoutingRuleUpdate,
 )
 from ..services.ab_testing import variant_click_counts
+from ..services.deep_link import device_fingerprint
 from ..services.smart_redirect import merge_link_utms
 
 router = APIRouter(tags=["targeting"])
@@ -286,3 +291,89 @@ def declare_winner(
     db.commit()
     db.refresh(test)
     return ABTestOut.model_validate(test)
+
+
+# ── Smart deep linking ─────────────────────────────────────────────────────────
+
+@router.get("/links/{link_id}/deeplink", response_model=DeepLinkConfigOut)
+def get_deep_link(
+    link_id: UUID,
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(require_role("viewer")),
+):
+    """Get a link's deep-link configuration (404 if none)."""
+    org_id = user.require_org()
+    _get_link(db, link_id, org_id)
+    config = db.query(DeepLinkConfig).filter(DeepLinkConfig.link_id == link_id).first()
+    if not config:
+        raise HTTPException(status_code=404, detail="No deep-link config for this link.")
+    return DeepLinkConfigOut.model_validate(config)
+
+
+@router.put("/links/{link_id}/deeplink", response_model=DeepLinkConfigOut)
+def upsert_deep_link(
+    link_id: UUID,
+    req: DeepLinkConfigUpsert,
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(require_role("marketing_manager")),
+):
+    """Create or replace a link's deep-link configuration."""
+    org_id = user.require_org()
+    _get_link(db, link_id, org_id)
+
+    config = db.query(DeepLinkConfig).filter(DeepLinkConfig.link_id == link_id).first()
+    data = req.model_dump()
+    if config:
+        for key, value in data.items():
+            setattr(config, key, value)
+    else:
+        config = DeepLinkConfig(org_id=org_id, link_id=link_id, **data)
+        db.add(config)
+    db.commit()
+    db.refresh(config)
+    return DeepLinkConfigOut.model_validate(config)
+
+
+@router.delete("/links/{link_id}/deeplink", response_model=DeleteResponse)
+def delete_deep_link(
+    link_id: UUID,
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(require_role("marketing_manager")),
+):
+    """Remove a link's deep-link configuration."""
+    org_id = user.require_org()
+    _get_link(db, link_id, org_id)
+    config = db.query(DeepLinkConfig).filter(DeepLinkConfig.link_id == link_id).first()
+    if not config:
+        raise HTTPException(status_code=404, detail="No deep-link config for this link.")
+    db.delete(config)
+    db.commit()
+    return DeleteResponse(deleted=1)
+
+
+@router.get("/deeplink/resolve", response_model=DeferredDeepLinkOut)
+async def resolve_deferred_deep_link(request: Request):
+    """Public endpoint a freshly-installed app calls to claim its deferred path.
+
+    Matches the original click by a coarse device fingerprint (IP + OS + device)
+    stored at click time. Degrades gracefully to ``found=false`` when Redis is
+    unavailable or no match exists.
+    """
+    ip = request.client.host if request.client else "0.0.0.0"
+    ua = request.headers.get("user-agent", "")
+    fp = device_fingerprint(ip, ua)
+    try:
+        from ..redis import get_redis
+        r = get_redis()
+        raw = await r.get(f"deferred:{fp}")
+        if not raw:
+            return DeferredDeepLinkOut(found=False)
+        await r.delete(f"deferred:{fp}")
+        data = json.loads(raw)
+        return DeferredDeepLinkOut(
+            found=True,
+            deep_link=data.get("deep_link", ""),
+            short_code=data.get("short_code", ""),
+        )
+    except Exception:
+        return DeferredDeepLinkOut(found=False)

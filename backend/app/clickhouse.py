@@ -90,7 +90,9 @@ def _ensure_schema() -> None:
         is_qr_scan      UInt8 DEFAULT 0,
 
         variant_id      String DEFAULT '',
-        rule_id         String DEFAULT ''
+        rule_id         String DEFAULT '',
+
+        deeplink_outcome LowCardinality(String) DEFAULT ''
     )
     ENGINE = MergeTree()
     PARTITION BY toYYYYMM(click_date)
@@ -104,6 +106,7 @@ def _ensure_schema() -> None:
         "language LowCardinality(String) DEFAULT ''",
         "variant_id String DEFAULT ''",
         "rule_id String DEFAULT ''",
+        "deeplink_outcome LowCardinality(String) DEFAULT ''",
     ):
         ch.command(f"ALTER TABLE clicks ADD COLUMN IF NOT EXISTS {column_ddl}")
 
