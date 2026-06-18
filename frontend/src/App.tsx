@@ -10,6 +10,7 @@ import LinksPage from "./pages/LinksPage";
 import TargetingPage from "./pages/TargetingPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import CampaignsPage from "./pages/CampaignsPage";
+import TagValidatorPage from "./pages/TagValidatorPage";
 import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient({
@@ -47,6 +48,7 @@ export default function App() {
               <Route path="links/:id/targeting" element={<TargetingPage />} />
               <Route path="analytics" element={<AnalyticsPage />} />
               <Route path="campaigns" element={<CampaignsPage />} />
+              <Route path="tag-validator" element={<TagValidatorPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
 
