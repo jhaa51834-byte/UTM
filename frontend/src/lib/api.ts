@@ -273,6 +273,13 @@ export const api = {
       body: JSON.stringify({ variant_id: variantId, apply_to_link: applyToLink }),
     }),
 
+  // Smart deep linking
+  getDeepLink: (linkId: string) => request<any>(`/links/${linkId}/deeplink`),
+  saveDeepLink: (linkId: string, data: any) =>
+    request<any>(`/links/${linkId}/deeplink`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteDeepLink: (linkId: string) =>
+    request<{ deleted: number }>(`/links/${linkId}/deeplink`, { method: "DELETE" }),
+
   // Admin
   getAuditLogs: (params: Record<string, string> = {}) => {
     const qs = new URLSearchParams(params).toString();

@@ -11,7 +11,7 @@ from .link import Link, LinkTag
 UtmLink = Link
 from .organization import OrgMembership, Organization, Team, TeamMembership
 from .qr_code import QRCode
-from .targeting import ABTest, ABVariant, RoutingRule
+from .targeting import ABTest, ABVariant, DeepLinkConfig, RoutingRule
 from .template import Template
 from .user import RefreshToken, Session, User
 
@@ -44,4 +44,5 @@ __all__ = [
     "RoutingRule",
     "ABTest",
     "ABVariant",
+    "DeepLinkConfig",
 ]

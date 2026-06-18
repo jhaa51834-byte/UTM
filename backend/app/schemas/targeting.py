@@ -167,3 +167,76 @@ class DeclareWinnerRequest(BaseModel):
     # When true, the link's primary destination is rewritten to the winner and
     # the test is marked completed.
     apply_to_link: bool = True
+
+
+# ── Smart deep linking ─────────────────────────────────────────────────────────
+
+def _validate_app_target(v: str) -> str:
+    """Allow app schemes (myapp://…) and http(s) app links; reject anything else."""
+    v = (v or "").strip()
+    if not v:
+        return v
+    if "://" not in v:
+        raise ValueError("must be a URI like myapp://path or https://…")
+    return v
+
+
+class DeepLinkConfigUpsert(BaseModel):
+    """Create or replace a link's deep-link configuration."""
+    is_active: bool = True
+    deferred: bool = True
+
+    android_package_name: str = Field(default="", max_length=255)
+    android_deep_link: str = ""
+    play_store_url: str = ""
+
+    ios_bundle_id: str = Field(default="", max_length=255)
+    ios_deep_link: str = ""
+    app_store_url: str = ""
+
+    desktop_url: str = ""
+
+    @field_validator("android_deep_link", "ios_deep_link")
+    @classmethod
+    def _check_app_links(cls, v: str) -> str:
+        return _validate_app_target(v)
+
+    @field_validator("play_store_url", "app_store_url", "desktop_url")
+    @classmethod
+    def _check_urls(cls, v: str) -> str:
+        v = (v or "").strip()
+        if v and not (v.startswith("http://") or v.startswith("https://")):
+            raise ValueError("must start with http:// or https://")
+        return v
+
+    @model_validator(mode="after")
+    def _need_one_platform(self) -> "DeepLinkConfigUpsert":
+        if not (self.android_deep_link or self.play_store_url
+                or self.ios_deep_link or self.app_store_url):
+            raise ValueError("configure at least one of Android or iOS targets")
+        return self
+
+
+class DeepLinkConfigOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    link_id: UUID
+    is_active: bool = True
+    deferred: bool = True
+    android_package_name: str = ""
+    android_deep_link: str = ""
+    play_store_url: str = ""
+    ios_bundle_id: str = ""
+    ios_deep_link: str = ""
+    app_store_url: str = ""
+    desktop_url: str = ""
+    created_at: datetime
+    updated_at: datetime
+
+
+class DeferredDeepLinkOut(BaseModel):
+    """Returned to a freshly-installed app claiming its deferred path."""
+    found: bool = False
+    deep_link: str = ""
+    short_code: str = ""

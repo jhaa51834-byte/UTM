@@ -72,6 +72,9 @@ class Link(Base, UUIDMixin, TimestampMixin):
     ab_test = relationship(
         "ABTest", back_populates="link", uselist=False, cascade="all, delete-orphan",
     )
+    deep_link = relationship(
+        "DeepLinkConfig", back_populates="link", uselist=False, cascade="all, delete-orphan",
+    )
 
 
 class LinkTag(Base):

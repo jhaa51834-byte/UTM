@@ -102,3 +102,44 @@ class ABVariant(Base, UUIDMixin, TimestampMixin):
     is_control: Mapped[bool] = mapped_column(Boolean, default=False)
 
     test = relationship("ABTest", back_populates="variants")
+
+
+class DeepLinkConfig(Base, UUIDMixin, TimestampMixin):
+    """Smart deep-linking config for a link (one per link).
+
+    On a mobile click the redirect serves an interstitial that opens the native
+    app, falling back to the app store when the app is not installed. Desktop
+    clicks fall through to normal link resolution.
+    """
+    __tablename__ = "deep_link_configs"
+    __table_args__ = (
+        UniqueConstraint("link_id", name="uq_deep_link_configs_link"),
+        Index("idx_deep_link_configs_org", "org_id"),
+    )
+
+    org_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False,
+    )
+    link_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), ForeignKey("links.id", ondelete="CASCADE"), nullable=False,
+    )
+
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    # When true, the intended app path is remembered (Redis) so the app can
+    # resume to it after a store install (deferred deep linking).
+    deferred: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Android
+    android_package_name: Mapped[str] = mapped_column(String(255), default="")
+    android_deep_link: Mapped[str] = mapped_column(Text, default="")
+    play_store_url: Mapped[str] = mapped_column(Text, default="")
+
+    # iOS
+    ios_bundle_id: Mapped[str] = mapped_column(String(255), default="")
+    ios_deep_link: Mapped[str] = mapped_column(Text, default="")
+    app_store_url: Mapped[str] = mapped_column(Text, default="")
+
+    # Desktop fallback (empty -> the link's default destination)
+    desktop_url: Mapped[str] = mapped_column(Text, default="")
+
+    link = relationship("Link", back_populates="deep_link")
