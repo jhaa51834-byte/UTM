@@ -7,6 +7,7 @@ import {
   ListChecks,
   BarChart3,
   Megaphone,
+  Tag,
   Settings,
   ChevronsLeft,
   ChevronsRight,
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { path: "/links", label: "Links", icon: ListChecks },
   { path: "/analytics", label: "Analytics", icon: BarChart3 },
   { path: "/campaigns", label: "Campaigns", icon: Megaphone },
+  { path: "/tag-validator", label: "Tag Validator", icon: Tag },
   { path: "/settings", label: "Settings", icon: Settings },
 ];
 

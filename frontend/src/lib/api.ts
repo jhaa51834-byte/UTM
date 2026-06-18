@@ -280,6 +280,10 @@ export const api = {
   deleteDeepLink: (linkId: string) =>
     request<{ deleted: number }>(`/links/${linkId}/deeplink`, { method: "DELETE" }),
 
+  // Tag validation
+  validateTags: (payload: { url?: string; html?: string }) =>
+    request<any>("/validate-tags", { method: "POST", body: JSON.stringify(payload) }),
+
   // Admin
   getAuditLogs: (params: Record<string, string> = {}) => {
     const qs = new URLSearchParams(params).toString();
