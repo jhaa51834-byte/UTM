@@ -4,9 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from ..deps import (
-    CurrentUser, PaginationParams, RequireManager, RequireViewer, get_db,
-)
+from ..deps import CurrentUser, PaginationParams, get_db, require_role
 from ..schemas.common import DeleteResponse, PaginatedResponse
 from ..schemas.link import LinkCreate, LinkOut, LinkToggle, LinkUpdate
 from ..services.link_service import (
@@ -31,7 +29,7 @@ def _to_out(link, domain: str | None = None) -> LinkOut:
 def create(
     req: LinkCreate,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireManager),
+    user: CurrentUser = Depends(require_role("marketing_manager")),
 ):
     """Create a new short link."""
     org_id = user.require_org()
@@ -80,7 +78,7 @@ def create(
 @router.get("", response_model=PaginatedResponse[LinkOut])
 def list_links(
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireViewer),
+    user: CurrentUser = Depends(require_role("viewer")),
     pagination: PaginationParams = Depends(),
     search: str = Query(default="", max_length=255),
     campaign_id: UUID | None = Query(default=None),
@@ -105,7 +103,7 @@ def list_links(
 def get_link(
     link_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireViewer),
+    user: CurrentUser = Depends(require_role("viewer")),
 ):
     """Get a single link by ID."""
     from ..models.link import Link
@@ -120,7 +118,7 @@ def update(
     link_id: UUID,
     req: LinkUpdate,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireManager),
+    user: CurrentUser = Depends(require_role("marketing_manager")),
 ):
     """Update a link."""
     from ..models.link import Link
@@ -135,7 +133,7 @@ def update(
 def delete(
     link_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireManager),
+    user: CurrentUser = Depends(require_role("marketing_manager")),
 ):
     """Delete a link."""
     from ..models.link import Link
@@ -151,7 +149,7 @@ def toggle(
     link_id: UUID,
     req: LinkToggle,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireManager),
+    user: CurrentUser = Depends(require_role("marketing_manager")),
 ):
     """Enable or disable a link."""
     from ..models.link import Link

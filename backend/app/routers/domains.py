@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from ..deps import CurrentUser, RequireAdmin, RequireViewer, get_db
+from ..deps import CurrentUser, get_db, require_role
 from ..models.domain import CustomDomain
 from ..schemas.common import DeleteResponse
 from ..schemas.domain import (
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/domains", tags=["domains"])
 def add_domain(
     req: DomainCreate,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     org_id = user.require_org()
     existing = db.query(CustomDomain).filter(CustomDomain.domain == req.domain.lower()).first()
@@ -32,7 +32,7 @@ def add_domain(
 @router.get("", response_model=list[DomainOut])
 def list_domains(
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireViewer),
+    user: CurrentUser = Depends(require_role("viewer")),
 ):
     org_id = user.require_org()
     domains = db.query(CustomDomain).filter(CustomDomain.org_id == org_id).all()
@@ -43,7 +43,7 @@ def list_domains(
 def verify_domain(
     domain_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     org_id = user.require_org()
     domain = db.query(CustomDomain).filter(
@@ -64,7 +64,7 @@ def verify_domain(
 def domain_health(
     domain_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     org_id = user.require_org()
     domain = db.query(CustomDomain).filter(
@@ -85,7 +85,7 @@ def domain_health(
 def delete_domain(
     domain_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     org_id = user.require_org()
     domain = db.query(CustomDomain).filter(

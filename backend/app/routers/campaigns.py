@@ -6,10 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from ..deps import (
-    CurrentUser, PaginationParams, RequireManager, RequireAdmin,
-    RequireViewer, get_db,
-)
+from ..deps import CurrentUser, PaginationParams, get_db, require_role
 from ..models.campaign import Campaign
 from ..schemas.campaign import CampaignCreate, CampaignOut, CampaignUpdate
 from ..schemas.common import DeleteResponse, PaginatedResponse
@@ -26,7 +23,7 @@ def _slug(name: str) -> str:
 def create_campaign(
     req: CampaignCreate,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireManager),
+    user: CurrentUser = Depends(require_role("marketing_manager")),
 ):
     org_id = user.require_org()
     campaign = Campaign(
@@ -48,7 +45,7 @@ def create_campaign(
 @router.get("", response_model=PaginatedResponse[CampaignOut])
 def list_campaigns(
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireViewer),
+    user: CurrentUser = Depends(require_role("viewer")),
     pagination: PaginationParams = Depends(),
     status_filter: str = Query(default="", alias="status"),
     search: str = Query(default=""),
@@ -74,7 +71,7 @@ def list_campaigns(
 def get_campaign(
     campaign_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireViewer),
+    user: CurrentUser = Depends(require_role("viewer")),
 ):
     org_id = user.require_org()
     c = db.query(Campaign).filter(Campaign.id == campaign_id, Campaign.org_id == org_id).first()
@@ -93,7 +90,7 @@ def update_campaign(
     campaign_id: UUID,
     req: CampaignUpdate,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireManager),
+    user: CurrentUser = Depends(require_role("marketing_manager")),
 ):
     org_id = user.require_org()
     c = db.query(Campaign).filter(Campaign.id == campaign_id, Campaign.org_id == org_id).first()
@@ -110,7 +107,7 @@ def update_campaign(
 def delete_campaign(
     campaign_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     org_id = user.require_org()
     c = db.query(Campaign).filter(Campaign.id == campaign_id, Campaign.org_id == org_id).first()

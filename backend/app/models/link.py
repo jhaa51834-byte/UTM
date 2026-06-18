@@ -66,6 +66,12 @@ class Link(Base, UUIDMixin, TimestampMixin):
     domain = relationship("CustomDomain", back_populates="links")
     creator = relationship("User", foreign_keys=[created_by])
     qr_codes = relationship("QRCode", back_populates="link")
+    routing_rules = relationship(
+        "RoutingRule", back_populates="link", cascade="all, delete-orphan",
+    )
+    ab_test = relationship(
+        "ABTest", back_populates="link", uselist=False, cascade="all, delete-orphan",
+    )
 
 
 class LinkTag(Base):

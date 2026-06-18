@@ -9,7 +9,7 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
 from ..models.organization import OrgMembership
@@ -121,12 +121,10 @@ async def get_current_user(
     except ValueError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
 
-    if hasattr(db, "execute"):
-        # Async session
+    if isinstance(db, AsyncSession):
         result = await db.execute(select(User).where(User.id == uid))
         user = result.scalar_one_or_none()
     else:
-        # Sync session
         user = db.query(User).filter(User.id == uid).first()
 
     if not user or not user.is_active:
@@ -147,7 +145,7 @@ async def get_current_user(
         role = "super_admin"
     elif org_id:
         # Look up membership
-        if hasattr(db, "execute"):
+        if isinstance(db, AsyncSession):
             result = await db.execute(
                 select(OrgMembership).where(
                     OrgMembership.user_id == uid,

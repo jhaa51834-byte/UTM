@@ -5,13 +5,12 @@ import random
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..config import settings
 from ..models.link import Link
-from ..utils.base62 import ALPHABET, encode_padded
-from ..utils.hashing import hash_password
+from ..utils.base62 import ALPHABET
+from ..utils.hashing import hash_password, verify_password
 
 
 def generate_short_code(db: Session, custom_alias: str | None = None, length: int = 7) -> str:
@@ -116,6 +115,18 @@ def resolve_short_code(db: Session, short_code: str) -> Link | None:
     if link.max_clicks and link.click_count >= link.max_clicks:
         return None
     return link
+
+
+def verify_link_password(link: Link, password: str | None) -> bool:
+    """Check a plaintext password against a link's stored hash.
+
+    Returns True when the link is not protected, or when the password matches.
+    """
+    if not link.password_hash:
+        return True
+    if not password:
+        return False
+    return verify_password(password, link.password_hash)
 
 
 def increment_click_count(db: Session, link_id: uuid.UUID) -> None:

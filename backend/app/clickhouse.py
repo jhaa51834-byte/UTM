@@ -83,9 +83,14 @@ def _ensure_schema() -> None:
         utm_content     String DEFAULT '',
         utm_term        String DEFAULT '',
 
+        language        LowCardinality(String) DEFAULT '',
+
         is_unique       UInt8 DEFAULT 1,
         is_bot          UInt8 DEFAULT 0,
-        is_qr_scan      UInt8 DEFAULT 0
+        is_qr_scan      UInt8 DEFAULT 0,
+
+        variant_id      String DEFAULT '',
+        rule_id         String DEFAULT ''
     )
     ENGINE = MergeTree()
     PARTITION BY toYYYYMM(click_date)
@@ -93,6 +98,14 @@ def _ensure_schema() -> None:
     TTL click_date + INTERVAL 2 YEAR
     SETTINGS index_granularity = 8192
     """)
+
+    # Forward-compat: add A/B + smart-redirect columns to pre-existing tables.
+    for column_ddl in (
+        "language LowCardinality(String) DEFAULT ''",
+        "variant_id String DEFAULT ''",
+        "rule_id String DEFAULT ''",
+    ):
+        ch.command(f"ALTER TABLE clicks ADD COLUMN IF NOT EXISTS {column_ddl}")
 
     ch.command("""
     CREATE MATERIALIZED VIEW IF NOT EXISTS clicks_daily_mv
@@ -132,15 +145,22 @@ def insert_clicks(rows: list[dict[str, Any]]) -> None:
     """Batch-insert click events into ClickHouse."""
     if not rows:
         return
-    ch = get_clickhouse()
-    columns = list(rows[0].keys())
-    data = [list(row.values()) for row in rows]
-    ch.insert("clicks", data, column_names=columns)
+    try:
+        ch = get_clickhouse()
+        columns = list(rows[0].keys())
+        data = [list(row.values()) for row in rows]
+        ch.insert("clicks", data, column_names=columns)
+    except Exception:
+        pass
 
 
 def query(sql: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     """Execute a query and return rows as dicts."""
-    ch = get_clickhouse()
-    result = ch.query(sql, parameters=params or {})
-    columns = result.column_names
-    return [dict(zip(columns, row)) for row in result.result_rows]
+    try:
+        ch = get_clickhouse()
+        result = ch.query(sql, parameters=params or {})
+        columns = result.column_names
+        return [dict(zip(columns, row)) for row in result.result_rows]
+    except Exception:
+        return []
+

@@ -4,9 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from ..deps import (
-    CurrentUser, PaginationParams, RequireAdmin, RequireSuperAdmin, get_db,
-)
+from ..deps import CurrentUser, PaginationParams, get_db, require_role
 from ..models.api_key import APIKey
 from ..models.audit import AuditLog
 from ..schemas.common import DeleteResponse, PaginatedResponse
@@ -20,7 +18,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 @router.get("/audit-logs")
 def list_audit_logs(
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
     pagination: PaginationParams = Depends(),
     action: str = Query(default=""),
 ):
@@ -55,7 +53,7 @@ def list_audit_logs(
 @router.get("/api-keys")
 def list_api_keys(
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     org_id = user.require_org()
     keys = db.query(APIKey).filter(APIKey.org_id == org_id, APIKey.is_active.is_(True)).all()
@@ -79,7 +77,7 @@ def create_api_key_endpoint(
     name: str = Query(...),
     scopes: str = Query(default="read"),
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     org_id = user.require_org()
     full_key, prefix, key_hash = generate_api_key()
@@ -110,7 +108,7 @@ def create_api_key_endpoint(
 def revoke_api_key(
     key_id: UUID,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireAdmin),
+    user: CurrentUser = Depends(require_role("org_admin")),
 ):
     org_id = user.require_org()
     key = db.query(APIKey).filter(APIKey.id == key_id, APIKey.org_id == org_id).first()
@@ -126,7 +124,7 @@ def revoke_api_key(
 @router.get("/stats")
 def platform_stats(
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(RequireSuperAdmin),
+    user: CurrentUser = Depends(require_role("super_admin")),
 ):
     from ..models.organization import Organization
     from ..models.user import User

@@ -148,6 +148,12 @@ export default function LinksPage() {
                       >
                         Copy
                       </button>
+                      <a
+                        href={`/links/${link.id}/targeting`}
+                        className="rounded px-2 py-1 text-[10px] text-violet-400 hover:bg-violet-500/10"
+                      >
+                        Targeting
+                      </a>
                       <button
                         onClick={() => deleteLink(link.id)}
                         className="rounded px-2 py-1 text-[10px] text-red-400 hover:bg-red-500/10"
