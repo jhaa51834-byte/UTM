@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
+import { Plus, Link2, MousePointerClick, Calendar, X } from "lucide-react";
 
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
@@ -38,26 +39,39 @@ export default function CampaignsPage() {
     }
   };
 
+  // Calculate campaign timeline progress
+  const getProgress = (start?: string, end?: string) => {
+    if (!start || !end) return null;
+    const now = new Date().getTime();
+    const s = new Date(start).getTime();
+    const e = new Date(end).getTime();
+    if (now < s) return 0;
+    if (now > e) return 100;
+    return Math.round(((now - s) / (e - s)) * 100);
+  };
+
   return (
-    <div className="animate-fade-up space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="animate-fade-up flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Campaigns</h1>
-          <p className="text-sm text-zinc-500">Organize and track marketing campaigns</p>
+          <h1 className="page-title">Campaigns</h1>
+          <p className="page-subtitle">Organize and track marketing campaigns</p>
         </div>
         <button className="btn-primary" onClick={() => setShowCreate(!showCreate)}>
-          + New Campaign
+          {showCreate ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {showCreate ? "Cancel" : "New Campaign"}
         </button>
       </div>
 
       {/* Create Form */}
       {showCreate && (
-        <div className="glass animate-fade-up rounded-xl p-5 space-y-4">
-          <h3 className="text-sm font-semibold text-zinc-300">Create Campaign</h3>
+        <div className="glass animate-scale-in rounded-2xl p-6 space-y-5 border-violet-500/10">
+          <h3 className="text-sm font-semibold text-zinc-200" style={{ fontFamily: 'var(--font-display)' }}>Create Campaign</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs text-zinc-400">Name *</label>
+              <label className="mb-2 block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Name *</label>
               <input
+                id="campaign-name"
                 className="input-field"
                 placeholder="Q3 Product Launch"
                 value={form.name}
@@ -65,8 +79,9 @@ export default function CampaignsPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-zinc-400">Description</label>
+              <label className="mb-2 block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Description</label>
               <input
+                id="campaign-desc"
                 className="input-field"
                 placeholder="Multi-channel product launch campaign"
                 value={form.description}
@@ -74,7 +89,7 @@ export default function CampaignsPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-zinc-400">Start Date</label>
+              <label className="mb-2 block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Start Date</label>
               <input
                 type="date"
                 className="input-field"
@@ -83,7 +98,7 @@ export default function CampaignsPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-zinc-400">End Date</label>
+              <label className="mb-2 block text-xs font-semibold text-zinc-400 uppercase tracking-wider">End Date</label>
               <input
                 type="date"
                 className="input-field"
@@ -93,7 +108,7 @@ export default function CampaignsPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={handleCreate} className="btn-primary" disabled={!form.name}>
+            <button id="create-campaign-btn" onClick={handleCreate} className="btn-primary" disabled={!form.name}>
               Create
             </button>
             <button onClick={() => setShowCreate(false)} className="btn-secondary">
@@ -106,41 +121,78 @@ export default function CampaignsPage() {
       {/* Campaign Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {loading ? (
-          <p className="col-span-full py-12 text-center text-zinc-500">Loading...</p>
+          <div className="col-span-full py-16 text-center">
+            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-violet-500/30 border-t-violet-500" />
+          </div>
         ) : (
-          campaigns.map((c) => (
-            <div key={c.id} className="glass glass-hover cursor-pointer rounded-xl p-5 transition-all duration-200">
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="font-semibold text-zinc-200">{c.name}</h3>
-                <span className={`badge ${statusColor(c.status)}`}>{c.status}</span>
+          campaigns.map((c, i) => {
+            const progress = getProgress(c.start_date, c.end_date);
+            return (
+              <div
+                key={c.id}
+                className="glass glass-hover gradient-border cursor-pointer rounded-2xl p-5 transition-all duration-300 animate-fade-up"
+                style={{ animationDelay: `${i * 0.07}s` }}
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-semibold text-zinc-200" style={{ fontFamily: 'var(--font-display)' }}>{c.name}</h3>
+                  <span className={`badge ${statusColor(c.status)}`}>{c.status}</span>
+                </div>
+
+                {c.description && (
+                  <p className="mb-4 text-xs text-zinc-600 line-clamp-2">{c.description}</p>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-white/[0.025] p-3 border border-white/[0.04]">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Link2 className="h-3 w-3 text-zinc-600" />
+                      <p className="text-[10px] text-zinc-600 uppercase font-semibold tracking-wider">Links</p>
+                    </div>
+                    <p className="text-lg font-bold text-zinc-200">{c.link_count || 0}</p>
+                  </div>
+                  <div className="rounded-xl bg-white/[0.025] p-3 border border-white/[0.04]">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <MousePointerClick className="h-3 w-3 text-zinc-600" />
+                      <p className="text-[10px] text-zinc-600 uppercase font-semibold tracking-wider">Clicks</p>
+                    </div>
+                    <p className="text-lg font-bold text-zinc-200">
+                      {(c.total_clicks || 0).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Timeline progress */}
+                {progress !== null && (
+                  <div className="mt-4">
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-[10px] text-zinc-600">
+                        <Calendar className="h-3 w-3" />
+                        {c.start_date}
+                      </span>
+                      <span className="text-[10px] text-zinc-600">{c.end_date}</span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-white/[0.04] overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-violet-500 to-cyan-400"
+                        style={{ width: `${progress}%`, boxShadow: '0 0 8px rgba(139, 92, 246, 0.3)' }}
+                      />
+                    </div>
+                    <p className="mt-1 text-right text-[10px] text-zinc-700">{progress}% elapsed</p>
+                  </div>
+                )}
+
+                {(!c.start_date && !c.end_date) && null}
+                {(c.start_date || c.end_date) && progress === null && (
+                  <div className="mt-3 flex items-center gap-2 text-[10px] text-zinc-700">
+                    <Calendar className="h-3 w-3" />
+                    {c.start_date && <span>{c.start_date}</span>}
+                    {c.start_date && c.end_date && <span>→</span>}
+                    {c.end_date && <span>{c.end_date}</span>}
+                  </div>
+                )}
               </div>
-
-              {c.description && (
-                <p className="mb-4 text-xs text-zinc-500 line-clamp-2">{c.description}</p>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg bg-white/[0.03] p-2.5">
-                  <p className="text-xs text-zinc-500">Links</p>
-                  <p className="text-lg font-bold text-zinc-200">{c.link_count || 0}</p>
-                </div>
-                <div className="rounded-lg bg-white/[0.03] p-2.5">
-                  <p className="text-xs text-zinc-500">Clicks</p>
-                  <p className="text-lg font-bold text-zinc-200">
-                    {(c.total_clicks || 0).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              {(c.start_date || c.end_date) && (
-                <div className="mt-3 flex items-center gap-2 text-[10px] text-zinc-600">
-                  {c.start_date && <span>{c.start_date}</span>}
-                  {c.start_date && c.end_date && <span>→</span>}
-                  {c.end_date && <span>{c.end_date}</span>}
-                </div>
-              )}
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
